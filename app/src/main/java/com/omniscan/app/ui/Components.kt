@@ -6,16 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -35,21 +32,19 @@ fun SectionCard(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        backgroundColor = MaterialTheme.cardBackground
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
                 title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.SemiBold
             )
             if (subtitle != null) {
                 Text(
                     subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.mutedText
                 )
             }
             Spacer(Modifier.width(4.dp))
@@ -68,12 +63,12 @@ fun InfoRow(label: String, value: String) {
     ) {
         Text(
             label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.mutedText
         )
         Text(
             value,
-            style = MaterialTheme.typography.bodySmall.copy(
+            style = MaterialTheme.typography.caption.copy(
                 fontFamily = FontFamily.Monospace
             ),
             fontWeight = FontWeight.Medium
@@ -112,8 +107,8 @@ fun SignalBadge(dbm: Int?) {
 fun EmptyHint(text: String) {
     Text(
         text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.body2,
+        color = MaterialTheme.mutedText,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -121,12 +116,12 @@ fun EmptyHint(text: String) {
 @Composable
 fun CountPill(n: Int) {
     Surface(
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+        color = MaterialTheme.colors.primary.copy(alpha = 0.20f),
         shape = RoundedCornerShape(50)
     ) {
         Text(
             "$n",
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colors.primary,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)

@@ -12,11 +12,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,7 +51,7 @@ private fun ScanHeader(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(1.dp))
             Text("   "); CountPill(count)
         }
@@ -60,7 +60,7 @@ private fun ScanHeader(
                 CircularProgressIndicator(
                     modifier = Modifier.height(16.dp),
                     strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colors.onPrimary
                 )
             } else {
                 Icon(Icons.Filled.Refresh, contentDescription = null)
@@ -77,7 +77,7 @@ fun WifiScreen(vm: ScanViewModel) {
     val scanning by vm.wifi.scanning.collectAsState()
     Column(Modifier.fillMaxSize()) {
         ScanHeader("WLAN", aps.size, scanning, "Scan") { vm.wifi.triggerScan() }
-        if (aps.isEmpty()) EmptyHint("Noch keine Netze. Tippe auf „Scan". " +
+        if (aps.isEmpty()) EmptyHint("Noch keine Netze. Tippe auf \"Scan\". " +
             "Hinweis: Android drosselt WLAN-Scans — bei häufigem Scannen kommen " +
             "gecachte Ergebnisse.")
         LazyColumn(Modifier.fillMaxSize()) {
@@ -87,7 +87,7 @@ fun WifiScreen(vm: ScanViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         SignalBadge(ap.rssi)
                         Text("${ap.band} · Kanal ${ap.channel}",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.caption,
                             fontFamily = FontFamily.Monospace)
                     }
                     InfoRow("Sicherheit", ap.security)
@@ -113,14 +113,14 @@ fun BluetoothScreen(vm: ScanViewModel) {
         else if (!vm.bluetooth.enabled)
             EmptyHint("Bluetooth ist aus — bitte in den Schnelleinstellungen aktivieren.")
         else if (devs.isEmpty())
-            EmptyHint("Noch nichts gefunden. Tippe auf „Scan" (Classic-Discovery + BLE laufen parallel).")
+            EmptyHint("Noch nichts gefunden. Tippe auf \"Scan\" (Classic-Discovery + BLE laufen parallel).")
         LazyColumn(Modifier.fillMaxSize()) {
             items(devs) { d ->
                 SectionCard(title = d.name ?: "(ohne Namen)", subtitle = d.address) {
                     Row(Modifier.fillMaxWidth().padding(top = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         SignalBadge(d.rssi)
-                        Text(d.type, style = MaterialTheme.typography.bodySmall,
+                        Text(d.type, style = MaterialTheme.typography.caption,
                             fontFamily = FontFamily.Monospace)
                     }
                     InfoRow("Bindung", d.bondState)
@@ -140,7 +140,7 @@ fun NfcScreen(nfc: NfcReader?) {
     val emptyFlow = remember { MutableStateFlow<List<NfcTag>>(emptyList()) }
     val history by (nfc?.history ?: emptyFlow).collectAsState()
     Column(Modifier.fillMaxSize()) {
-        Text("NFC", style = MaterialTheme.typography.titleLarge,
+        Text("NFC", style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(14.dp))
         when {
@@ -179,10 +179,10 @@ fun CellScreen(vm: ScanViewModel) {
         ScanHeader("Mobilfunk", cells.size, false, "Aktualisieren") { vm.cell.refresh() }
         if (vm.cell.networkOperator.isNotBlank())
             Text("Netz: ${vm.cell.networkOperator}",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(horizontal = 14.dp))
         if (cells.isEmpty())
-            EmptyHint("Keine Zellinfos. Tippe „Aktualisieren". " +
+            EmptyHint("Keine Zellinfos. Tippe \"Aktualisieren\". " +
                 "Braucht Telefon- + Standort-Freigabe und eine SIM.")
         LazyColumn(Modifier.fillMaxSize()) {
             items(cells) { c ->
@@ -206,7 +206,7 @@ fun LocationScreen(vm: ScanViewModel) {
     val sats by vm.location.satellites.collectAsState()
     val used = sats.count { it.usedInFix }
     Column(Modifier.fillMaxSize()) {
-        Text("Standort & Satelliten", style = MaterialTheme.typography.titleLarge,
+        Text("Standort & Satelliten", style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.Bold, modifier = Modifier.padding(14.dp))
         SectionCard(title = "Position",
             subtitle = if (vm.location.gpsEnabled) "GPS aktiv" else "GPS aus") {
@@ -221,7 +221,7 @@ fun LocationScreen(vm: ScanViewModel) {
             }
         }
         Text("  Satelliten: $used im Fix / ${sats.size} sichtbar",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.body2,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp))
         LazyColumn(Modifier.fillMaxSize()) {
@@ -244,7 +244,7 @@ fun UsbScreen(vm: ScanViewModel) {
     Column(Modifier.fillMaxSize()) {
         ScanHeader("USB", devs.size, false, "Aktualisieren") { vm.usb.refresh() }
         if (devs.isEmpty())
-            EmptyHint("Keine USB-Geräte. Schließe etwas per USB-OTG an und tippe „Aktualisieren".")
+            EmptyHint("Keine USB-Geräte. Schließe etwas per USB-OTG an und tippe \"Aktualisieren\".")
         LazyColumn(Modifier.fillMaxSize()) {
             items(devs) { d ->
                 SectionCard(title = d.product ?: d.deviceName,
@@ -265,7 +265,7 @@ fun SensorScreen(vm: ScanViewModel) {
     val sensors by vm.sensors.results.collectAsState()
     Column(Modifier.fillMaxSize()) {
         ScanHeader("Sensoren", sensors.size, false, "Aktualisieren") { vm.sensors.refresh() }
-        if (sensors.isEmpty()) EmptyHint("Tippe „Aktualisieren".")
+        if (sensors.isEmpty()) EmptyHint("Tippe \"Aktualisieren\".")
         LazyColumn(Modifier.fillMaxSize()) {
             items(sensors) { s ->
                 SectionCard(title = s.name, subtitle = s.type) {

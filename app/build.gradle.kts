@@ -1,16 +1,17 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.omniscan.app"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.omniscan.app"
-        minSdk = 30          // Android 11 – NR(5G) NCI + String-Zell-IDs ohne Version-Guards
-        targetSdk = 35       // Android 15
+        minSdk = 30
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         vectorDrawables { useSupportLibrary = true }
@@ -36,9 +37,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -47,16 +45,16 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.02")
-    implementation(composeBom)
-
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.activity:activity-compose:1.9.2")
 
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui:1.7.2")
+    implementation("androidx.compose.ui:ui-graphics:1.7.2")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.7.2")
+    implementation("androidx.compose.foundation:foundation:1.7.2")
+    implementation("androidx.compose.animation:animation:1.7.2")
+    implementation("androidx.compose.material:material:1.7.2")
+    implementation("androidx.compose.material:material-icons-core:1.7.2")
+    implementation("androidx.compose.runtime:runtime:1.7.2")
 }

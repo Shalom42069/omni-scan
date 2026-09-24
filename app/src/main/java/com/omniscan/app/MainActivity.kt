@@ -9,18 +9,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScrollableTabRow
+import androidx.compose.material.Surface
+import androidx.compose.material.Tab
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.omniscan.app.scan.NfcReader
 import com.omniscan.app.scan.Permissions
 import com.omniscan.app.ui.BluetoothScreen
@@ -46,17 +45,19 @@ import com.omniscan.app.ui.WifiScreen
 class MainActivity : ComponentActivity() {
 
     private var nfc: NfcReader? = null
+    private lateinit var scanViewModel: ScanViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfc = NfcReader(this)
+        scanViewModel = ViewModelProvider(this)[ScanViewModel::class.java]
         setContent {
             OmniScanTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colors.background
                 ) {
-                    AppRoot(nfc)
+                    AppRoot(nfc, scanViewModel)
                 }
             }
         }
@@ -77,10 +78,8 @@ private val TABS = listOf(
     "WLAN", "Bluetooth", "NFC", "Mobilfunk", "Standort", "USB", "Sensoren"
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppRoot(nfc: NfcReader?) {
-    val vm: ScanViewModel = viewModel()
+private fun AppRoot(nfc: NfcReader?, vm: ScanViewModel) {
     val context = LocalContext.current
     var selected by remember { mutableIntStateOf(0) }
 
@@ -88,7 +87,6 @@ private fun AppRoot(nfc: NfcReader?) {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { /* Ergebnis egal — Screens reagieren selbst auf fehlende Rechte */ }
 
-    // Beim Start einmal alle nötigen Rechte anfragen
     LaunchedEffect(Unit) {
         if (!Permissions.allGranted(context)) {
             permLauncher.launch(Permissions.required())
