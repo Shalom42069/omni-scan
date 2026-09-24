@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="ic_launcher_background">#0B3D2E</color>
-    <string name="app_name">OmniScan</string>
-    <style name="Theme.OmniScan" parent="android:Theme.Material.NoActionBar"/>
-</resources>
