@@ -1,0 +1,133 @@
+package com.omniscan.app
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.omniscan.app.scan.NfcReader
+import com.omniscan.app.scan.Permissions
+import com.omniscan.app.ui.BluetoothScreen
+import com.omniscan.app.ui.CellScreen
+import com.omniscan.app.ui.LocationScreen
+import com.omniscan.app.ui.NfcScreen
+import com.omniscan.app.ui.OmniScanTheme
+import com.omniscan.app.ui.ScanViewModel
+import com.omniscan.app.ui.SensorScreen
+import com.omniscan.app.ui.UsbScreen
+import com.omniscan.app.ui.WifiScreen
+
+class MainActivity : ComponentActivity() {
+
+    private var nfc: NfcReader? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        nfc = NfcReader(this)
+        setContent {
+            OmniScanTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppRoot(nfc)
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        nfc?.enableReader()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nfc?.disableReader()
+    }
+}
+
+private val TABS = listOf(
+    "WLAN", "Bluetooth", "NFC", "Mobilfunk", "Standort", "USB", "Sensoren"
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AppRoot(nfc: NfcReader?) {
+    val vm: ScanViewModel = viewModel()
+    val context = LocalContext.current
+    var selected by remember { mutableIntStateOf(0) }
+
+    val permLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* Ergebnis egal — Screens reagieren selbst auf fehlende Rechte */ }
+
+    // Beim Start einmal alle nötigen Rechte anfragen
+    LaunchedEffect(Unit) {
+        if (!Permissions.allGranted(context)) {
+            permLauncher.launch(Permissions.required())
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("OmniScan") },
+                actions = {
+                    IconButton(onClick = { permLauncher.launch(Permissions.required()) }) {
+                        Icon(Icons.Filled.Lock, contentDescription = "Berechtigungen")
+                    }
+                }
+            )
+        }
+    ) { pad ->
+        Box(Modifier.padding(pad).fillMaxSize()) {
+            Column {
+                ScrollableTabRow(selectedTabIndex = selected, edgePadding = 8.dp) {
+                    TABS.forEachIndexed { i, title ->
+                        Tab(
+                            selected = selected == i,
+                            onClick = { selected = i },
+                            text = { Text(title) }
+                        )
+                    }
+                }
+                when (selected) {
+                    0 -> WifiScreen(vm)
+                    1 -> BluetoothScreen(vm)
+                    2 -> NfcScreen(nfc)
+                    3 -> CellScreen(vm)
+                    4 -> LocationScreen(vm)
+                    5 -> UsbScreen(vm)
+                    6 -> SensorScreen(vm)
+                }
+            }
+        }
+    }
+}
