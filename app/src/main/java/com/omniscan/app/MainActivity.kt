@@ -1,5 +1,7 @@
 package com.omniscan.app
 
+import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,8 +36,13 @@ import com.omniscan.app.scan.NfcReader
 import com.omniscan.app.scan.Permissions
 import com.omniscan.app.ui.BluetoothScreen
 import com.omniscan.app.ui.CellScreen
+import com.omniscan.app.ui.GattExplorerScreen
 import com.omniscan.app.ui.LocationScreen
 import com.omniscan.app.ui.NfcScreen
+import com.omniscan.app.ui.PortScanScreen
+import com.omniscan.app.ui.SecurityToolboxScreen
+import com.omniscan.app.ui.VpnMonitorScreen
+import com.omniscan.app.vpn.OmniVpnService
 import com.omniscan.app.ui.OmniScanTheme
 import com.omniscan.app.ui.ScanViewModel
 import com.omniscan.app.ui.SensorScreen
@@ -75,7 +82,7 @@ class MainActivity : ComponentActivity() {
 }
 
 private val TABS = listOf(
-    "WLAN", "Bluetooth", "NFC", "Mobilfunk", "Standort", "USB", "Sensoren"
+    "WLAN", "Bluetooth", "NFC", "Mobilfunk", "Standort", "Ports", "GATT", "Security", "VPN", "USB", "Sensoren"
 )
 
 @Composable
@@ -86,6 +93,14 @@ private fun AppRoot(nfc: NfcReader?, vm: ScanViewModel) {
     val permLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { /* Ergebnis egal — Screens reagieren selbst auf fehlende Rechte */ }
+
+    val vpnPrepareLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            context.startService(Intent(context, OmniVpnService::class.java))
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (!Permissions.allGranted(context)) {
@@ -122,8 +137,16 @@ private fun AppRoot(nfc: NfcReader?, vm: ScanViewModel) {
                     2 -> NfcScreen(nfc)
                     3 -> CellScreen(vm)
                     4 -> LocationScreen(vm)
-                    5 -> UsbScreen(vm)
-                    6 -> SensorScreen(vm)
+                    5 -> PortScanScreen(vm)
+                    6 -> GattExplorerScreen(vm)
+                    7 -> SecurityToolboxScreen(vm)
+                    8 -> VpnMonitorScreen(onRequestStart = {
+                        val intent = VpnService.prepare(context)
+                        if (intent != null) vpnPrepareLauncher.launch(intent)
+                        else context.startService(Intent(context, OmniVpnService::class.java))
+                    })
+                    9 -> UsbScreen(vm)
+                    10 -> SensorScreen(vm)
                 }
             }
         }

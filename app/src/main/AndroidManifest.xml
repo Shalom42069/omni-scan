@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ============ WLAN ============ -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- Android 13+ : Scannen ohne Standort -->
@@ -32,6 +34,17 @@
     <!-- ============ NFC ============ -->
     <uses-permission android:name="android.permission.NFC" />
 
+    <!-- ============ VPN-Traffic-Monitor ============ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Für den App-Permission-Auditor: sieht alle installierten Apps,
+         nicht nur die per Package-Visibility sichtbaren. Kein Root nötig,
+         nur bei Play-Store-Distribution rechtfertigungspflichtig. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <!-- Hardware als optional deklarieren, damit die App auf jedem Gerät installierbar bleibt -->
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
@@ -58,5 +71,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+    
+        <service
+            android:name=".vpn.OmniVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="network-security-monitoring" />
+        </service>
+</application>
 </manifest>

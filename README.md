@@ -12,6 +12,10 @@ was **ohne Root** über die offiziellen Android-APIs erfasst werden kann:
 | **Standort** | Position (Lat/Lon/Höhe/Genauigkeit/Speed) **+** Live-GNSS-Satelliten (GPS, GLONASS, Galileo, BeiDou, QZSS, SBAS, NavIC) mit C/N0, Elevation, Azimut, im-Fix | `ACCESS_FINE_LOCATION` |
 | **USB** | Per USB-OTG angeschlossene Geräte: VID/PID, Hersteller/Produkt, Geräteklasse, Interfaces | keine |
 | **Sensoren** | Alle verbauten Sensoren: Name, Hersteller, Typ, Messbereich, Auflösung, Stromaufnahme, Wake-Up | keine |
+| **Ports** | TCP-Connect-Portscanner (Common-Ports oder eigener Bereich), Banner-Grabbing | `INTERNET` |
+| **GATT** | BLE-GATT-Explorer: verbinden per MAC, Services/Characteristics auslesen, lesen/schreiben/Notify wo erlaubt | `BLUETOOTH_CONNECT` |
+| **Security** | Hash (MD5/SHA1/SHA256/SHA512), Base64/Hex/URL-Encoding, JWT-Decoder, TLS-Zertifikats-Inspektor, App-Permission-Auditor | `INTERNET`, `QUERY_ALL_PACKAGES` |
+| **VPN** | Per-App-Traffic-Monitor: welche App verbindet wohin (IP:Port, Bytes) — läuft als lokales VPN | `BIND_VPN_SERVICE` (Nutzer-Dialog) |
 
 ## Ehrliche Grenzen (Hardware, nicht Software)
 
@@ -23,6 +27,15 @@ was **ohne Root** über die offiziellen Android-APIs erfasst werden kann:
   Die App zeigt deshalb bei häufigem Tippen die zuletzt gecachten Ergebnisse.
 - **BT-MAC-Adressen** sind bei modernen Geräten oft randomisiert (Privacy).
 - Ohne Root gibt es **kein** Monitor-Mode/Packet-Capture, kein Deauth, kein Raw-802.11.
+- Der **Portscanner** ist ein TCP-Connect-Scan (kein SYN-Scan) — langsamer und leichter erkennbar, aber
+  root-frei möglich, weil er normale `Socket`-Verbindungen statt Raw-Sockets nutzt.
+- Der **VPN-Traffic-Monitor** implementiert einen vereinfachten User-Space-TCP/UDP-NAT-Stack
+  (kein root, kein Kernel-Modul) — UDP wird vollständig weitergeleitet, TCP ohne eigene
+  Retransmission-Timer/Congestion-Control. Für normale Mobil-/WLAN-Verbindungen funktioniert das
+  gut, ist aber kein RFC-vollständiger TCP-Stack (kein Ersatz für z. B. lwIP/tun2socks). Nur ein
+  VPN kann gleichzeitig aktiv sein — andere VPN-Apps müssen während der Nutzung deaktiviert sein.
+- Der **App-Permission-Auditor** zeigt nur eine kuratierte Liste bekannter "dangerous"-Permissions,
+  keine vollständige Android-Referenzliste (die sich je Version ändert).
 
 ## Bauen
 
@@ -57,4 +70,20 @@ app/src/main/java/com/omniscan/app/
 └─ ui/                      Compose (Material3): Theme, Components, Screens, ViewModel
 ```
 
-Min SDK 30 (Android 11), Target SDK 35 (Android 15), Kotlin + Jetpack Compose (Material3).
+Min SDK 30 (Android 11), Target SDK 34 (Android 14), Kotlin 2.0 + Jetpack Compose (Material2 — Material3
+war offline nicht vollständig cachebar, siehe Build-Historie).
+
+## Pentesting-/Security-Features (root-frei)
+
+Zusätzlich zu den reinen Scannern enthält OmniScan vier root-freie Security-Werkzeuge:
+
+1. **Port-Scanner** (`Ports`-Tab) — TCP-Connect-Scan gegen einen Host, Common-Ports oder eigener
+   Bereich, mit einfachem Banner-Grabbing.
+2. **BLE-GATT-Explorer** (`GATT`-Tab) — verbindet sich zu einem BLE-Gerät per MAC-Adresse, listet
+   alle Services/Characteristics mit ihren Properties und erlaubt Lesen/Schreiben/Notify-Abo.
+3. **Security-Toolbox** (`Security`-Tab) — Hash-Rechner (MD5/SHA1/SHA256/SHA512), Base64/Hex/URL-
+   Encoding, JWT-Decoder (Header/Payload, unverifiziert), TLS-Zertifikats-Inspektor (Kette, Gültigkeit,
+   Fingerprint), App-Permission-Auditor (installierte Apps + ihre gewährten/verweigerten Dangerous-
+   Permissions).
+4. **VPN-Traffic-Monitor** (`VPN`-Tab) — protokolliert pro App, wohin sie verbindet (IP:Port,
+   übertragene Bytes), über einen root-freien lokalen VpnService.
